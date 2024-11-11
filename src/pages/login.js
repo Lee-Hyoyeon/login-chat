@@ -47,6 +47,14 @@ const login = () => {
                             marginTop: "20px",
                         }}
                     >
+                        <Image
+                            src="../../public/image.png"
+                            // roundedCircle
+                            style={{
+                                width: "20px",
+                                marginRight: "8px",
+                            }}
+                        />
                         Google login
                     </Button>
                 </div>
