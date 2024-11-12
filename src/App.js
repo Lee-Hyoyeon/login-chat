@@ -1,25 +1,16 @@
 import Login from "./pages/login.js";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Chat from "../src/pages/chat.js";
 
 function App() {
     return (
         <>
-            <Login />
-            {/* <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React
-                </a>
-            </header>
-            </div> */}
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/chat" element={<Chat />} />
+                </Routes>
+            </BrowserRouter>
         </>
     );
 }
