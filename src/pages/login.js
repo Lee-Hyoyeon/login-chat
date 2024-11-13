@@ -69,6 +69,7 @@ const Login = () => {
                         fontSize: "20px",
                         marginTop: "20px",
                     }}
+                    onClick={handleLogin(id, password)}
                 >
                     Login
                 </Button>
@@ -81,7 +82,6 @@ const Login = () => {
                             fontSize: "20px",
                             marginTop: "20px",
                         }}
-                        onClick={handleLogin(id, password)}
                     >
                         <Image
                             src="../../public/image.png"
