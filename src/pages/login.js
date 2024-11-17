@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Image from "react-bootstrap/Image";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import { GoogleLogin } from "@react-oauth/google";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ModalComponent from "../components/modal";
@@ -32,7 +33,7 @@ const Login = () => {
                 display: "flex",
                 justifyContent: "center",
                 marginTop: "10%",
-                height: "100vh",
+                height: "100%",
             }}
         >
             <Form
@@ -42,8 +43,7 @@ const Login = () => {
                     }
                 }
             >
-                {/* todo icon 추가하기 */}
-
+                {/* icon 추가하기 */}
                 <Form.Label>ID</Form.Label>
                 <Form.Control
                     type="id"
@@ -69,33 +69,22 @@ const Login = () => {
                         fontSize: "20px",
                         marginTop: "20px",
                     }}
-                    onClick={handleLogin(id, password)}
+                    onClick={handleLogin}
                 >
                     Login
                 </Button>
-                <div>
-                    <Button
-                        variant="secondary"
-                        style={{
-                            width: "250px",
-                            padding: "10px ",
-                            fontSize: "20px",
-                            marginTop: "20px",
+                <div style={{ marginTop: "20px" }}>
+                    <GoogleLogin
+                        onSuccess={(credentialResponse) => {
+                            console.log(credentialResponse);
                         }}
-                    >
-                        <Image
-                            src="../../public/image.png"
-                            // roundedCircle
-                            style={{
-                                width: "20px",
-                                marginRight: "8px",
-                            }}
-                        />
-                        Google login
-                    </Button>
+                        onError={() => {
+                            console.log("Login Failed");
+                        }}
+                    />
                 </div>
             </Form>
-            <ModalComponent onClose={handleCloseModal} />
+            {/* <ModalComponent onClose={handleCloseModal} /> */}
             {/* 모달 렌더링 */}
         </div>
     );
