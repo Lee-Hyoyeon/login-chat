@@ -1,54 +1,78 @@
-// import express from "express";
-// const app = express();
-// const port = 3001;
-
-// app.get("/", (req, res) => {
-//     res.send("Hello World!");
-// });
-
-// app.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`);
-// });
-
-import { google } from "googleapis";
-import { randomBytes } from "crypto";
 import express from "express";
 import session from "express-session";
+import { google } from "googleapis";
+import { randomBytes } from "crypto";
+import dotenv from "dotenv";
+
+dotenv.config(); // .env 파일 불러오기
+
+const app = express();
+const port = 3001;
+
+// https://accounts.google.com/o/oauth2/v2/auth?
+// client_id=641881315317-minurkkdos2f1l2mhapepftebuh91con.apps.googleusercontent.com&
+// redirect_uri=http://localhost:3000&
+// response_type=code&
+// scope=https://www.googleapis.com/auth/userinfo.profile%20openid&
+// access_type=offline
 
 /**
  * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI
  * from the client_secret.json file. To get these credentials for your application, visit
  * https://console.cloud.google.com/apis/credentials.
  */
-const oauth2Client = new google.auth.OAuth2(
-    YOUR_CLIENT_ID,
-    YOUR_CLIENT_SECRET,
-    YOUR_REDIRECT_URL
+// 세션 설정
+app.use(
+    session({
+        secret: "your_secret_key", //todo Change this to your secure key
+        resave: false,
+        saveUninitialized: true,
+    })
 );
 
-// Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
-const scopes = [
-    "https://www.googleapis.com/auth/drive.metadata.readonly",
-    "https://www.googleapis.com/auth/calendar.readonly",
-];
+const oauth2Client = new google.auth.OAuth2(
+    process.env.YOUR_CLIENT_ID,
+    process.env.YOUR_CLIENT_SECRET,
+    process.env.YOUR_REDIRECT_URL
+);
 
-// Generate a secure random state value.
-const state = randomBytes(32).toString("hex");
+const scopes = "https://www.googleapis.com/auth/userinfo.profile openid";
 
-// Store state in the session
-req.session.state = state;
+// app.get("/", (req, res) => {
+//     res.send("Welcome to Google OAuth example!");
+// });
 
-// Generate a url that asks permissions for the Drive activity and Google Calendar scope
-const authorizationUrl = oauth2Client.generateAuthUrl({
-    // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: "offline",
-    /** Pass in the scopes array defined above.
-     * Alternatively, if only one scope is needed, you can pass a scope URL as a string */
-    scope: scopes,
-    // Enable incremental authorization. Recommended as a best practice.
-    include_granted_scopes: true,
-    // Include the state parameter to reduce the risk of CSRF attacks.
-    state: state,
+app.get("/", (req, res) => {
+    const state = randomBytes(32).toString("hex");
+    req.session.state = state;
+    const authorizationUrl = oauth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: scopes,
+        include_granted_scopes: true,
+        response_type: "code",
+        state: state,
+    });
+
+    res.send(`<a href="${authorizationUrl}">Authenticate with Google</a>`);
 });
 
-res.redirect(authorizationUrl);
+// app.get("/callback", async (req, res) => {
+//     const { code, state } = req.query;
+
+//     if (state !== req.session.state) {
+//         return res.status(400).send("Invalid state parameter");
+//     }
+
+//     try {
+//         const { tokens } = await oauth2Client.getToken(code);
+//         oauth2Client.setCredentials(tokens);
+//         res.send("Authentication successful!");
+//     } catch (err) {
+//         console.error("Error retrieving access token", err);
+//         res.status(500).send("Authentication failed");
+//     }
+// });
+
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
