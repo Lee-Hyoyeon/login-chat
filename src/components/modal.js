@@ -1,4 +1,5 @@
 import React from "react";
+import { Image } from "react-bootstrap";
 
 const Modal = ({ onClose }) => {
     return (
