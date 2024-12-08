@@ -33,20 +33,20 @@ const Login = () => {
     const getCode = () => {
         // Authorization Code 요청
         // https://accounts.google.com/o/oauth2/v2/auth?client_id=641881315317-minurkkdos2f1l2mhapepftebuh91con.apps.googleusercontent.com&redirect_uri=http://localhost:3000&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile openid&access_type=offline&prompt=consent
-        //! 3. 인증 서버에 로그인하여 애플리케이션이 요청한 권한 부여
+        //? 3. 인증 서버에 로그인하여 애플리케이션이 요청한 권한 부여
         const authURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
         window.location.href = authURL;
     };
 
     useEffect(() => {
         const fetchToken = async () => {
-            //!4. 권한 부여코드를 넣어 해당 URL로 리다이렉트
+            //?4. 권한 부여코드를 넣어 해당 URL로 리다이렉트
             const queryParams = new URLSearchParams(window.location.search);
             const authCode = queryParams.get("code"); // URL에서 'code' 추출
 
             if (authCode) {
                 console.log("Authorization Code:", authCode);
-
+                // 서버로 토큰 요청
                 try {
                     const response = await fetch(
                         "http://localhost:3001/get-token",
@@ -63,8 +63,10 @@ const Login = () => {
                     }
                     const data = await response.json(); // JSON 데이터로 파싱
                     const accessToken = data.access_token;
+                    console.log(accessToken);
+                    document.cookie = `access_token=${accessToken}; path=/; max-age=3600; SameSite=Strict`;
 
-                    //!7. 애플리케이션은 Access Token으로 리소스 서버에 사용자 정보 요청 - 착각인듯
+                    //?7. 애플리케이션은 Access Token으로 리소스 서버에 사용자 정보 요청 - 착각인듯??????
                     //
                     try {
                         const response = await fetch(
@@ -79,12 +81,10 @@ const Login = () => {
                         const data = await response.json();
                         console.log("user info", data);
                         console.log(data.name);
-
-                        // 여기서 6.이 끝난겁니다 ~!~!~!~!~!
+                        //? 여기서 6.이 끝난겁니다 ~!~!~!~!~!
                         /*
                             백엔드의 app.post("/chat", async (req, res) => { 를 보러가서 액세스 토큰을 보내서 jwt변환을 하고 쿠키에 그걸 저장하는 처리를 해주세요
                             브라우저의 쿠키에 토큰이 저장되면 아래 navigate코드가 실행되도록
-
                         */
                         navigate(`/chat?${data.name}`); //chatting page 이동
                         // 이동만 하면 안되고 채팅을 할수 있어야되겠죠 -> websocket
@@ -95,9 +95,6 @@ const Login = () => {
 
                     // *** yyy대신에 name {name} 이런식으로 바꾼다음에 화면에 표시해보기 ***
                     // *** 쿠키에 토큰을 넣어놔야합니다. ***
-
-                    // 받은 데이터를 처리하거나 저장
-                    // 예: localStorage.setItem('accessToken', data.access_token);
                 } catch (error) {
                     console.error("Error during authentication:", error);
                     setShowModal(true);
@@ -110,7 +107,7 @@ const Login = () => {
 
     const handleGoogleLoginSuccess = async () => {
         //todo 그럼 성공로그인엔 뭘해?
-        // /get-userinfo 사용자 정보 가져오나 (서버에서해 프론트에서해)
+        // /get-userinfo 사용자 정보 가져오나 (서버에서해 프론트에서해) 위에서 함
     };
 
     // Google 로그인 실패 처리
@@ -177,11 +174,12 @@ const Login = () => {
                     </Button>
                     {/* num 1. 유저가 애플리케이션 사용요청 */}
                     <div style={{ marginTop: "20px" }}>
-                        {/* //!1. 유저가 애플리케이션 사용요청 */}
-                        {/* //!2. 애플리케이션은 유저를 인증 서버 로그인 페이지로 리다이렉트  */}
+                        {/* //?1. 유저가 애플리케이션 사용요청 */}
+                        {/* //?2. 애플리케이션은 유저를 인증 서버 로그인 페이지로 리다이렉트  */}
                         <GoogleLogin
                             click_listener={() => getCode()}
                             onSuccess={handleGoogleLoginSuccess}
+                            ux_mode="redirect"
                             onError={handleGoogleLoginError}
                         />
                     </div>
