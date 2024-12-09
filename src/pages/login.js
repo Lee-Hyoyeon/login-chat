@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { GoogleLogin } from "@react-oauth/google";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import ModalComponent from "../components/modal";
+import ChatComponent from "./chat";
 import { Image } from "react-bootstrap";
 
 const Login = () => {
@@ -32,7 +33,6 @@ const Login = () => {
 
     const getCode = () => {
         // Authorization Code 요청
-        // https://accounts.google.com/o/oauth2/v2/auth?client_id=641881315317-minurkkdos2f1l2mhapepftebuh91con.apps.googleusercontent.com&redirect_uri=http://localhost:3000&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile openid&access_type=offline&prompt=consent
         //? 3. 인증 서버에 로그인하여 애플리케이션이 요청한 권한 부여
         const authURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUrl}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
         window.location.href = authURL;
@@ -64,9 +64,16 @@ const Login = () => {
                     const data = await response.json(); // JSON 데이터로 파싱
                     const accessToken = data.access_token;
                     console.log(accessToken);
-                    document.cookie = `access_token=${accessToken}; path=/; max-age=3600; SameSite=Strict`;
+                    document.cookie = `access_token=${accessToken}; path=/; max-age=900; SameSite=Strict`; //save cookie
 
-                    //?7. 애플리케이션은 Access Token으로 리소스 서버에 사용자 정보 요청 - 착각인듯??????
+                    // 쿠키가 특정 이름의 토큰 값을 포함하는지 확인
+                    if (document.cookie.includes("access_token")) {
+                        console.log("access_token 쿠키가 존재합니다!");
+                    } else {
+                        console.log("access_token 쿠키가 없습니다.");
+                    }
+
+                    //?7. 애플리케이션은 Access Token으로 리소스 서버에 사용자 정보 요청 (( 정체가 뭐야 그럼 ))
                     //
                     try {
                         const response = await fetch(
@@ -81,19 +88,13 @@ const Login = () => {
                         const data = await response.json();
                         console.log("user info", data);
                         console.log(data.name);
-                        //? 여기서 6.이 끝난겁니다 ~!~!~!~!~!
-                        /*
-                            백엔드의 app.post("/chat", async (req, res) => { 를 보러가서 액세스 토큰을 보내서 jwt변환을 하고 쿠키에 그걸 저장하는 처리를 해주세요
-                            브라우저의 쿠키에 토큰이 저장되면 아래 navigate코드가 실행되도록
-                        */
-                        navigate(`/chat?${data.name}`); //chatting page 이동
-                        // 이동만 하면 안되고 채팅을 할수 있어야되겠죠 -> websocket
+                        //? 여기서 6. 끝 --------------------
+
+                        window.location.href = "/chat";
                     } catch (error) {
                         console.error("Error during authentication:", error);
                         setShowModal(true);
                     }
-
-                    // *** yyy대신에 name {name} 이런식으로 바꾼다음에 화면에 표시해보기 ***
                     // *** 쿠키에 토큰을 넣어놔야합니다. ***
                 } catch (error) {
                     console.error("Error during authentication:", error);

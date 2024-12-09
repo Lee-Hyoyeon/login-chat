@@ -1,7 +1,6 @@
 import React from "react";
-import { Image } from "react-bootstrap";
 
-const Modal = ({ onClose }) => {
+const Modal = ({ onClose, title }) => {
     return (
         <div
             style={{
@@ -37,7 +36,7 @@ const Modal = ({ onClose }) => {
                         marginBottom: "20px",
                     }}
                 />
-                <h3>Login Failed</h3>
+                <h3>{title}</h3>
                 <p>Please try again.</p>
 
                 {/* 버튼 */}
