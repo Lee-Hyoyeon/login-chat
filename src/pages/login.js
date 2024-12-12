@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { GoogleLogin } from "@react-oauth/google";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ModalComponent from "../components/modal";
-import ChatComponent from "./chat";
 import { Image } from "react-bootstrap";
 
 const Login = () => {
@@ -74,20 +73,19 @@ const Login = () => {
                     }
 
                     //?7. 애플리케이션은 Access Token으로 리소스 서버에 사용자 정보 요청 (( 정체가 뭐야 그럼 ))
-                    //
                     try {
-                        const response = await fetch(
-                            "https://www.googleapis.com/oauth2/v2/userinfo",
-                            {
-                                method: "GET",
-                                headers: {
-                                    Authorization: `Bearer ${accessToken}`,
-                                },
-                            }
-                        );
-                        const data = await response.json();
-                        console.log("user info", data);
-                        console.log(data.name);
+                        // const response = await fetch(
+                        //     "https://www.googleapis.com/oauth2/v2/userinfo",
+                        //     {
+                        //         method: "GET",
+                        //         headers: {
+                        //             Authorization: `Bearer ${accessToken}`,
+                        //         },
+                        //     }
+                        // );
+                        // const data = await response.json();
+                        // console.log("user info", data);
+                        // console.log(data.name);
                         //? 여기서 6. 끝 --------------------
 
                         window.location.href = "/chat";
@@ -95,7 +93,6 @@ const Login = () => {
                         console.error("Error during authentication:", error);
                         setShowModal(true);
                     }
-                    // *** 쿠키에 토큰을 넣어놔야합니다. ***
                 } catch (error) {
                     console.error("Error during authentication:", error);
                     setShowModal(true);
@@ -120,7 +117,6 @@ const Login = () => {
     return (
         <div
             style={{
-                // backgroundColor: "lightblue",
                 display: "flex",
                 justifyContent: "center",
                 marginTop: "10%",
