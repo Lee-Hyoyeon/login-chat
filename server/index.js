@@ -27,20 +27,37 @@ const server = app.listen(port, () => {
 });
 
 const wss = new WebSocketServer({ server });
-
 wss.on("connection", (ws) => {
-    console.log("클라이언트 연결됨");
+    console.log("A new client connected");
+    console.log("Number of clients connected:", wss.clients.size);
 
     // 클라이언트로부터 메시지를 받으면
-    ws.on("message", (message) => {
+    ws.on("message", (data) => {
+        const message = data.toString("utf-8"); // Buffer 데이터를 문자열로 변환 한글, 영어 잘나오게
         console.log("받은 메시지:", message);
-        // 클라이언트에게 응답 메시지 전송
-        ws.send("서버로부터 응답: " + message);
+
+        // 모든 클라이언트에게 메시지를 보냄
+        // 메시지를 다른 클라이언트에게 전송
+        wss.clients.forEach((client) => {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(message); // 다른 클라이언트에게 메시지 전송
+            }
+        });
+        // // 클라이언트에게 응답 메시지 전송
+        // ws.send("서버로부터 응답: " + message);
     });
 
-    // 연결이 성공적으로 되었을 때 클라이언트에게 초기 메시지 전송
-    ws.send("서버에 연결되었습니다!");
+    // // 연결이 성공적으로 되었을 때 클라이언트에게 초기 메시지 전송
+    // ws.send("서버에 연결되었습니다!");
 });
+// 오류 처리
+wss.onerror = (error) => {
+    console.error("웹소켓 오류:", error);
+};
+// 연결 종료 처리
+wss.onclose = () => {
+    console.log("웹소켓 연결이 닫혔습니다.");
+};
 
 // 권한 부여코드를 이용해 인증 서버에 Access Token 발급
 app.post("/get-token", async (req, res) => {

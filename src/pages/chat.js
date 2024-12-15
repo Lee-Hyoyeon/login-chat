@@ -3,19 +3,26 @@ import { googleLogout } from "@react-oauth/google";
 import { Button, Image } from "react-bootstrap";
 
 const Chat = () => {
-    const [username, setUserName] = useState();
-    const [message, setMessage] = useState("");
-    const [serverMessage, setServerMessage] = useState("");
+    const [username, setUserName] = useState(); //유저 이름
+    const [messages, setMessages] = useState([]); //메시지 상태
+    const [input, setInput] = useState("");
+    const [ws, setWs] = useState(null); //웹소켓 상태
 
     useEffect(() => {
         // 웹소켓 연결
-        const socket = new WebSocket("ws://localhost:3001"); // 서버와 동일한 포트 사용
-
+        const socket = new WebSocket("ws://localhost:3001");
+        socket.onopen = () => {
+            console.log("WebSocket connection opened");
+        };
         // 서버로부터 메시지 받기
         socket.onmessage = (event) => {
-            setServerMessage(event.data);
+            const message = event.data; // 서버로부터 받은 메시지
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                { text: message, sender: "other" },
+            ]);
         };
-
+        setWs(socket);
         // 연결 종료 시 클린업
         return () => socket.close();
     }, []);
@@ -63,19 +70,41 @@ const Chat = () => {
     };
 
     const sendMessage = () => {
-        const socket = new WebSocket("ws://localhost:3001");
-        socket.onopen = () => {
-            socket.send(message); // 서버로 메시지 전송
-        };
+        // 입력값에 공백만 있는 경우 메시지를 보내지 않음
+        if (input.trim()) {
+            // 내가 보낸 메시지 상태에 추가
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                { text: input, sender: "me" },
+                // { text: `${username}: ${input}`, sender: "me" },
+            ]);
+            // 서버로 메시지 전송
+            ws.send(input);
+            setInput(""); // 입력값 초기화
+        }
+    };
+    const handleKeyDown = (event) => {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
     };
 
     return (
-        <div>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center", // 세로 방향 중앙 정렬
+                alignItems: "center", // 가로 방향 중앙 정렬
+                margin: 0,
+            }}
+        >
             <h1>Chating </h1>
+            <h5>{username ? `Hi, ${username}!` : "Loading..."}</h5>
             <Button
                 variant="secondary"
                 style={{
-                    width: "100px",
+                    width: "80px",
                     opacity: "83%",
                     padding: "2px",
                     float: "right",
@@ -86,76 +115,78 @@ const Chat = () => {
             >
                 Logout
             </Button>
-            {username}
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-            />
-            {/* <button onClick={sendMessage}>메시지 보내기</button> */}
-            <Button onClick={sendMessage}>
-                <Image
-                    src="/images/send.png"
-                    alt="send"
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    marginTop: "10%",
+                }}
+            >
+                <div
                     style={{
-                        width: "30px",
-                        height: "30px",
+                        overflowY: "auto",
+                        height: "500px",
+                        border: "1px solid lightgray",
+                        borderRadius: "10px",
+                        padding: "10px",
                     }}
-                />
-            </Button>
-            <p>서버에서 받은 메시지: {serverMessage}</p>
+                >
+                    {/* 받은 메세지 내용 */}
+                    {messages?.map((message, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                textAlign:
+                                    message.sender === "me" ? "right" : "left",
+                                backgroundColor:
+                                    message.sender === "me"
+                                        ? "#7FACFD"
+                                        : "#D1F9C7",
+                                padding: "10px",
+                                margin: "5px",
+                                borderRadius: "10px",
+                            }}
+                        >
+                            {message.text}
+                        </div>
+                    ))}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center", // 세로 방향 정렬
+                            justifyContent: "center", // 가로 방향 정렬
+                        }}
+                    >
+                        {/* 입력 텍스트 창 */}
+                        <input
+                            type="text"
+                            style={{
+                                padding: "10px",
+                                margin: "5px",
+                                borderRadius: "10px",
+                                border: "1px solid gray",
+                            }}
+                            value={input}
+                            onKeyDown={handleKeyDown}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="메시지를 입력하세요"
+                        />
+                        {/* 전송 버튼 */}
+                        <Button onClick={sendMessage}>
+                            <Image
+                                src="/images/send.png"
+                                alt="send"
+                                style={{
+                                    width: "30px",
+                                    height: "30px",
+                                }}
+                            />
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
-
-// return (
-//     <div
-//         style={{
-//             backgroundColor: "skyblue",
-//             // display: "flex",
-//             justifyContent: "center",
-//             marginTop: "10%",
-//             // height: "100%",
-//         }}
-//     >
-//         Welcome to the Chat
-//         <Button
-//             variant="secondary"
-//             style={{
-//                 width: "100px",
-//                 opacity: "83%",
-//                 padding: "2px",
-//                 float: "right",
-//                 fontSize: "13px",
-//                 marginTop: "10px",
-//             }}
-//             onClick={handleLogout}
-//         >
-//             Logout
-//         </Button>
-//         <span style={{ float: "right" }}>{username}</span>
-//         <form
-//             style={{
-//                 justifyContent: "center",
-//                 width: "500px",
-//                 height: "800px",
-//                 backgroundColor: "pink",
-//             }}
-//         >
-//             afasfd
-//         </form>
-//         <Button>
-//             <Image
-//                 src="/images/send.png"
-//                 alt="send"
-//                 style={{
-//                     width: "30px",
-//                     height: "30px",
-//                 }}
-//             />
-//         </Button>
-//     </div>
-// );
-// };
 
 export default Chat;
