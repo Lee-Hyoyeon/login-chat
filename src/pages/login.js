@@ -49,7 +49,7 @@ const Login = () => {
                 try {
                     const response = await fetch(
                         // "http://localhost:3001/get-token",
-                        "http://ec2-18-225-92-171.us-east-2.compute.amazonaws.com/:3001/get-token",
+                        "http://ec2-18-225-92-171.us-east-2.compute.amazonaws.com:3001/get-token",
                         {
                             method: "POST",
                             headers: {

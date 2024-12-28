@@ -9,4 +9,10 @@ node_modules
 .DS_Store
 .cache
 /node_modules/.cache/
+build
 
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
