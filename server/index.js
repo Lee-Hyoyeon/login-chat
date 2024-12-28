@@ -6,6 +6,7 @@ import cors from "cors";
 
 const app = express();
 const port = 3001;
+// const port = "http://ec2-18-225-92-171.us-east-2.compute.amazonaws.com:3001";
 dotenv.config();
 
 app.use(cors());
